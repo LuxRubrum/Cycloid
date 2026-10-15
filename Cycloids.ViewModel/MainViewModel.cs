@@ -117,4 +117,74 @@ public sealed class MainViewModel
         InputUpdated?.Invoke(this, EventArgs.Empty);
         return true;
     }
+
+    /// <summary>
+    /// Запуск моделирования по проверенным параметрам (Блок управления временем и расчётами).
+    /// </summary>
+    public bool RunSimulation(out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            // Угловая скорость: ω = vLinWheel / rWheel
+            // Если скорость колеса нулевая, задаём минимальную эпсилон для поддержания формул
+            double omega = Math.Abs(VLinWheel) > 1e-9 
+                ? (VLinWheel / RWheel) 
+                : 1e-9;
+
+            // Создаём параметры модели (Core Model)
+            // При начальной фазе 0 в момент t=0 точка находится в нижнем положении (y = R - r)
+            var parameters = new CycloidParameters(
+                Radius: RWheel,
+                AngularVelocity: omega,
+                PointOffset: RDot,
+                InitialPhase: 0);
+
+            parameters.EnsureValid();
+
+            int steps = Math.Max(10, (int)Math.Round((TEnd - 0.0) / Dt));
+
+            // Вызываем сэмплер траектории модели
+            Points = _sampler.Sample(parameters, 0.0, TEnd, steps);
+            CurrentParameters = parameters;
+            Analytics = new CycloidAnalytics(parameters);
+
+            // Находим контрольные точки в моменты t = 0.4 с и t = 0.8 с
+            PointAt04 = FindClosestPoint(0.4);
+            PointAt08 = FindClosestPoint(0.8);
+
+            StatusMessage = $"Расчёт завершён успешно. Сгенерировано {Points.Count} точек.";
+            CalculationCompleted?.Invoke(this, EventArgs.Empty);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ошибка во время расчёта: {ex.Message}";
+            StatusMessage = errorMessage;
+            ErrorOccurred?.Invoke(errorMessage);
+            return false;
+        }
+    }
+
+    private PointState? FindClosestPoint(double targetTime)
+    {
+        if (Points is null || Points.Count == 0) return null;
+        if (targetTime > TEnd) return null;
+
+        PointState closest = Points[0];
+        double minDiff = Math.Abs(closest.Time - targetTime);
+
+        for (int i = 1; i < Points.Count; i++)
+        {
+            double diff = Math.Abs(Points[i].Time - targetTime);
+            if (diff < minDiff)
+            {
+                minDiff = diff;
+                closest = Points[i];
+            }
+        }
+
+        return closest;
+    }
 }
