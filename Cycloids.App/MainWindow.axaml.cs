@@ -1,5 +1,6 @@
 using System.Text;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Cycloids.ViewModel;
@@ -12,9 +13,20 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = new MainViewModel(new AvaloniaFrameTimer());
+
+        AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
     }
 
     private MainViewModel Vm => (MainViewModel)DataContext!;
+
+    private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && e.Source is TextBox)
+        {
+            this.FindControl<Button>("PlayButton")?.Focus();
+            e.Handled = true;
+        }
+    }
 
     private async void OnExportCsv(object? sender, RoutedEventArgs e)
         => await SaveTextAsync("Сохранить траекторию (CSV)", "cycloid-trajectory.csv", "csv", "CSV", "*.csv", Vm.BuildCsv);

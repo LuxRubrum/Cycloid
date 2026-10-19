@@ -118,7 +118,7 @@
 
       <Border Grid.Row="1" Padding="12,4,12,12">
         <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto">
-          <Button Grid.Column="0" Content="{Binding PlayPauseLabel}" Command="{Binding PlayPauseCommand}"
+          <Button x:Name="PlayButton" Grid.Column="0" Content="{Binding PlayPauseLabel}" Command="{Binding PlayPauseCommand}"
                   MinWidth="84" HorizontalContentAlignment="Center" />
           <Button Grid.Column="1" Content="Сброс" Command="{Binding ResetCommand}" Margin="8,0,0,0" />
           <Slider Grid.Column="2" Minimum="0" Maximum="{Binding MaxTime}" Value="{Binding CurrentTime}"
