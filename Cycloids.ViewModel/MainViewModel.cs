@@ -695,6 +695,9 @@ public sealed class MainViewModel : ViewModelBase
         var lines = new List<string>();
         bool allOk = true;
 
+        if (_imported is not null)
+            lines.Add("Проверки относятся к модели; точки из файла сравниваются в блоке «Импорт».");
+
         if (Markers.Count == 0)
         {
             lines.Add($"Маркеры не показаны: время T меньше {RuFormat.N(FirstMarkerTime, 1)} с.");
