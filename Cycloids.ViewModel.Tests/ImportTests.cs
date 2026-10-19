@@ -1,3 +1,4 @@
+using Cycloids.ViewModel.Infrastructure;
 using Cycloids.ViewModel.Services;
 
 namespace Cycloids.ViewModel.Tests;
@@ -198,5 +199,23 @@ public class ImportTests
     {
         string csv = Create().BuildCsv().Replace("# rWheel_m: 1", "# rWheel_m: 0");
         Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
+    }
+
+    [Fact]
+    public void Parse_RejectsInconsistentOmega()
+    {
+        string json = Create().BuildJson().Replace("\"omega\": 10,", "\"omega\": 11,");
+
+        var ex = Assert.Throws<FormatException>(() => ExperimentImporter.Parse(json));
+        Assert.Contains("?", ex.Message);
+    }
+
+    [Fact]
+    public void ParseCsv_RejectsInconsistentOmega()
+    {
+        string csv = Create().BuildCsv().Replace("# omega_rad_s: 10", "# omega_rad_s: 11");
+
+        var ex = Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
+        Assert.Contains("?", ex.Message);
     }
 }

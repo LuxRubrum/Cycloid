@@ -21,6 +21,14 @@ public static class ExperimentImporter
         if (p.PointOffset < 0) throw new FormatException("Расстояние d в файле не может быть отрицательным.");
         if (p.Step <= 0) throw new FormatException("Шаг dt в файле должен быть больше 0.");
         if (p.SimulationTime <= 0) throw new FormatException("Время T в файле должно быть больше 0.");
+
+        double expectedOmega = p.LinearVelocity / p.Radius;
+        if (Math.Abs(p.Omega - expectedOmega) > 1e-6 * Math.Max(1, Math.Abs(expectedOmega)))
+        {
+            throw new FormatException(string.Create(
+                CultureInfo.InvariantCulture,
+                $"В файле ω = {p.Omega}, а v / R = {expectedOmega}: параметры не согласованы."));
+        }
     }
 
     public static ImportedExperiment Parse(string json)
