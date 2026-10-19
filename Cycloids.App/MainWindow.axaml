@@ -42,19 +42,19 @@
           <TextBlock Text="Параметры" Classes="h" />
           <Grid ColumnDefinitions="*,110" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
             <TextBlock Grid.Row="0" Text="Скорость колеса v, м/с" Classes="lab" />
-            <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding VLinWheelText}" />
+            <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding VLinWheelText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="1" Text="Радиус колеса R, м" Classes="lab" />
-            <TextBox   Grid.Row="1" Grid.Column="1" Text="{Binding WheelRadiusText}" />
+            <TextBox   Grid.Row="1" Grid.Column="1" Text="{Binding WheelRadiusText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="2" Text="Расстояние до точки d, м" Classes="lab" />
-            <TextBox   Grid.Row="2" Grid.Column="1" Text="{Binding PointOffsetText}" />
+            <TextBox   Grid.Row="2" Grid.Column="1" Text="{Binding PointOffsetText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="3" Text="Шаг времени dt, с" Classes="lab" />
-            <TextBox   Grid.Row="3" Grid.Column="1" Text="{Binding DtText}" />
+            <TextBox   Grid.Row="3" Grid.Column="1" Text="{Binding DtText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="4" Text="Время моделирования T, с" Classes="lab" />
-            <TextBox   Grid.Row="4" Grid.Column="1" Text="{Binding SimulationTimeText}" />
+            <TextBox   Grid.Row="4" Grid.Column="1" Text="{Binding SimulationTimeText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="5" Text="Начальная фаза φ0, °" Classes="lab" />
-            <TextBox   Grid.Row="5" Grid.Column="1" Text="{Binding InitialPhaseText}" />
+            <TextBox   Grid.Row="5" Grid.Column="1" Text="{Binding InitialPhaseText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="6" Text="Скорость анимации, ×" Classes="lab" />
-            <TextBox   Grid.Row="6" Grid.Column="1" Text="{Binding TimeScaleText}" />
+            <TextBox   Grid.Row="6" Grid.Column="1" Text="{Binding TimeScaleText, UpdateSourceTrigger=LostFocus}" />
           </Grid>
           <TextBlock Text="{Binding OmegaText}" Classes="line" Margin="0,6,0,0" />
 
