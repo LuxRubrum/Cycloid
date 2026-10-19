@@ -14,6 +14,14 @@ public static class ExperimentImporter
     public const int MaxPoints = 2_000_000;
 
     private static readonly string[] ExpectedColumns = { "t", "x", "y", "vx", "vy", "speed" };
+    private static void ValidateParameters(ImportedParameters p)
+    {
+        if (p.Radius <= 0) throw new FormatException("Радиус R в файле должен быть больше 0.");
+        if (p.LinearVelocity == 0) throw new FormatException("Скорость v в файле не должна быть нулевой.");
+        if (p.PointOffset < 0) throw new FormatException("Расстояние d в файле не может быть отрицательным.");
+        if (p.Step <= 0) throw new FormatException("Шаг dt в файле должен быть больше 0.");
+        if (p.SimulationTime <= 0) throw new FormatException("Время T в файле должно быть больше 0.");
+    }
 
     public static ImportedExperiment Parse(string json)
     {
@@ -57,6 +65,7 @@ public static class ExperimentImporter
                 InitialPhase: Number(p, "initialPhase", "parameters.initialPhase"),
                 Step: Number(p, "dt", "parameters.dt"),
                 SimulationTime: Number(p, "simulationTime", "parameters.simulationTime"));
+            ValidateParameters(parameters);
 
             CheckColumns(root);
 
@@ -172,6 +181,7 @@ public static class ExperimentImporter
             InitialPhase: MetaNumber(meta, "initialPhase_rad"),
             Step: MetaNumber(meta, "dt_s"),
             SimulationTime: MetaNumber(meta, "simulationTime_s"));
+        ValidateParameters(parameters);
 
         return new ImportedExperiment(string.Empty, parameters, points);
     }

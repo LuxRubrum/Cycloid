@@ -186,4 +186,17 @@ public class ImportTests
         Assert.False(vm.HasImport);
         Assert.Contains("Не удалось открыть", vm.StatusMessage);
     }
+    [Fact]
+    public void Parse_RejectsInvalidRadius()
+    {
+        string json = Create().BuildJson().Replace("\"rWheel\": 1,", "\"rWheel\": 0,");
+        Assert.Throws<FormatException>(() => ExperimentImporter.Parse(json));
+    }
+
+    [Fact]
+    public void ParseCsv_RejectsInvalidRadius()
+    {
+        string csv = Create().BuildCsv().Replace("# rWheel_m: 1", "# rWheel_m: 0");
+        Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
+    }
 }
