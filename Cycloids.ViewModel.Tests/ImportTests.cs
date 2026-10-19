@@ -1,5 +1,4 @@
 using Cycloids.ViewModel.Infrastructure;
-using Cycloids.ViewModel.Infrastructure;
 using Cycloids.ViewModel.Services;
 
 namespace Cycloids.ViewModel.Tests;
@@ -275,5 +274,30 @@ public class ImportTests
         Assert.Equal(tBefore, vm.SimulationTimeText);
         Assert.False(vm.HasError);
         Assert.Contains("?? ??????? ???????", vm.StatusMessage);
+    }
+    [Fact]
+    public void ImportedPlayback_ReadoutUsesDisplayedPoint()
+    {
+        var vm = Create();
+        const string csv = """
+            # experiment: RollingWheelCycloid
+            # vLinWheel_m_s: 4
+            # rWheel_m: 2
+            # rDot_m: 0.75
+            # omega_rad_s: 2
+            # initialPhase_rad: 0
+            # dt_s: 1
+            # simulationTime_s: 1
+            t_s,x_m,y_m,vx_m_s,vy_m_s,speed_m_s
+            0,10,20,1,2,3
+            1,30,40,5,6,7
+            """;
+
+        vm.ImportCsv(csv, "custom.csv");
+        vm.CurrentTime = 0.5;
+
+        double expected = double.Hypot(20 - 2, 30);
+        Assert.Contains($"|CP| = {RuFormat.N(expected, 3)}", vm.CurrentReadout);
+        Assert.Contains("|a| = —", vm.CurrentReadout);
     }
 }

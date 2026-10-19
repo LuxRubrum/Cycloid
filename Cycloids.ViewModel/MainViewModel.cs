@@ -737,19 +737,29 @@ public sealed class MainViewModel : ViewModelBase
             : _calculator.GetPointState(CurrentTime);
         CurrentWheel = _calculator.GetWheelState(CurrentTime);
 
-        var rep = PointReport.Create(_calculator, CurrentTime, ActualDt);
         var s = CurrentPoint;
+        var w = CurrentWheel;
+
+        // МЦС — точка касания C = (X центра колеса, 0). Расстояние считаем до той точки,
+        // которая реально показана на графике (своя или из импортированного файла).
+        double distance = double.Hypot(s.X - w.CenterX, s.Y);
+        double speedFromIcs = Math.Abs(_omega) * distance;
+
+        // В импортированном файле ускорений нет, поэтому показывать «0» было бы неверно.
+        string acceleration = _playImportedData
+            ? "—"
+            : $"{RuFormat.N(s.AccelerationMagnitude, 2)} м/с²";
 
         CurrentReadout = string.Join(Environment.NewLine, new[]
         {
-            $"t = {RuFormat.N(s.Time, 3)} с",
-            $"x = {RuFormat.N(s.X, 3)} м,  y = {RuFormat.N(s.Y, 3)} м",
-            $"vx = {RuFormat.N(s.Vx, 3)},  vy = {RuFormat.N(s.Vy, 3)} м/с",
-            $"|v| = {RuFormat.N(s.Speed, 3)} м/с",
-            $"|a| = {RuFormat.N(s.AccelerationMagnitude, 2)} м/с²",
-            $"МЦС (касание): x = {RuFormat.N(rep.ContactX, 3)} м",
-            $"|CP| = {RuFormat.N(rep.DistanceToContact, 3)} м,  |ω|·|CP| = {RuFormat.N(rep.SpeedFromIcs, 3)} м/с",
-        });
+        $"t = {RuFormat.N(s.Time, 3)} с",
+        $"x = {RuFormat.N(s.X, 3)} м,  y = {RuFormat.N(s.Y, 3)} м",
+        $"vx = {RuFormat.N(s.Vx, 3)},  vy = {RuFormat.N(s.Vy, 3)} м/с",
+        $"|v| = {RuFormat.N(s.Speed, 3)} м/с",
+        $"|a| = {acceleration}",
+        $"МЦС (касание): x = {RuFormat.N(w.CenterX, 3)} м",
+        $"|CP| = {RuFormat.N(distance, 3)} м,  |ω|·|CP| = {RuFormat.N(speedFromIcs, 3)} м/с",
+    });
     }
 
     private PointState InterpolateImportedPoint(double time)
