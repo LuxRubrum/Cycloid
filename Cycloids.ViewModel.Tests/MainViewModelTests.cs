@@ -247,4 +247,13 @@ public class MainViewModelTests
 
         Assert.Throws<InvalidOperationException>(() => vm.BuildCsv());
     }
+    [Fact]
+    public void LargeStep_DoesNotProduceFalseVerificationFailure()
+    {
+        var vm = Create();
+        vm.DtText = "0.2";
+
+        Assert.False(vm.HasError);
+        Assert.True(vm.VerificationOk);
+    }
 }

@@ -677,8 +677,13 @@ public sealed class MainViewModel : ViewModelBase
         {
             bool icsOk = m.IcsRelativeError < 1e-9;
             bool angleOk = double.IsNaN(m.AngleToRadiusDegrees) || Math.Abs(m.AngleToRadiusDegrees - 90) < 1e-6;
-            bool ratioOk = m.NumericError < 1e-12 || (m.ConvergenceRatio > 3 && m.ConvergenceRatio < 5);
+            double wh = Math.Abs(_omega) * ActualDt;
+            bool ratioApplicable = wh <= 0.5 && m.NumericError > 1e-9;
+            bool ratioOk = !ratioApplicable || (m.ConvergenceRatio > 3 && m.ConvergenceRatio < 5);
             allOk &= icsOk && angleOk && ratioOk;
+            string ratioVerdict = ratioApplicable
+    ? Mark(ratioOk)
+    : $"не применимо (ω·h = {RuFormat.N(wh, 2)}, вне асимптотического диапазона)";
 
             lines.Add($"t = {RuFormat.N(m.Time, 1)} с");
             lines.Add($"  МЦС: |v| = {RuFormat.N(m.Point.Speed, 4)} м/с, |ω|·|CP| = {RuFormat.N(m.SpeedFromIcs, 4)} м/с — {Mark(icsOk)}");
