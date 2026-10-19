@@ -361,10 +361,37 @@ public sealed class MainViewModel : ViewModelBase
             }
 
             var previousBaseBounds = _baseBounds;
+            var previousImported = _imported;
+            var previousExtent = _importedExtent;
+            var previousPlay = _playImportedData;
+            var previousInputs = (_vText, _rText, _dText, _dtText, _tText, _phaseText);
+
             Imported = data;
             _importedExtent = new SceneBounds(xMin, xMax, yMin, yMax);
             _playImportedData = true;
             ApplyImportedParameters(data.Parameters);
+
+            if (HasError)
+            {
+                string reason = (ErrorMessage ?? string.Empty).Replace(Environment.NewLine, " ");
+
+                Imported = previousImported;
+                _importedExtent = previousExtent;
+                _playImportedData = previousPlay;
+
+                (_vText, _rText, _dText, _dtText, _tText, _phaseText) = previousInputs;
+                OnPropertyChanged(nameof(VLinWheelText));
+                OnPropertyChanged(nameof(WheelRadiusText));
+                OnPropertyChanged(nameof(PointOffsetText));
+                OnPropertyChanged(nameof(DtText));
+                OnPropertyChanged(nameof(SimulationTimeText));
+                OnPropertyChanged(nameof(InitialPhaseText));
+
+                Rebuild();
+                StatusMessage = $"Не удалось открыть «{fileName}»: {reason}";
+                return;
+            }
+
             _baseBounds = new SceneBounds(
                 Math.Min(previousBaseBounds.XMin, _baseBounds.XMin),
                 Math.Max(previousBaseBounds.XMax, _baseBounds.XMax),

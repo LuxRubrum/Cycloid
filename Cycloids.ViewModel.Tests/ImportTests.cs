@@ -1,4 +1,5 @@
 using Cycloids.ViewModel.Infrastructure;
+using Cycloids.ViewModel.Infrastructure;
 using Cycloids.ViewModel.Services;
 
 namespace Cycloids.ViewModel.Tests;
@@ -217,5 +218,62 @@ public class ImportTests
 
         var ex = Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
         Assert.Contains("?", ex.Message);
+    }
+
+    [Fact]
+    public void Parse_RejectsInconsistentOmega()
+    {
+        string json = Create().BuildJson().Replace("\"omega\": 10,", "\"omega\": 11,");
+
+        var ex = Assert.Throws<FormatException>(() => ExperimentImporter.Parse(json));
+        Assert.Contains("?", ex.Message);
+    }
+
+    [Fact]
+    public void ParseCsv_RejectsInconsistentOmega()
+    {
+        string csv = Create().BuildCsv().Replace("# omega_rad_s: 10", "# omega_rad_s: 11");
+
+        var ex = Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
+        Assert.Contains("?", ex.Message);
+    }
+
+    [Fact]
+    public void ImportCsv_WhenRebuildFails_RollsBackEverything()
+    {
+        var vm = Create();
+        vm.ImportJson(vm.BuildJson(), "good.json");
+
+        var importedBefore = vm.Imported;
+        var boundsBefore = vm.Bounds;
+        int countBefore = vm.Trajectory.Count;
+        string vBefore = vm.VLinWheelText;
+        string dtBefore = vm.DtText;
+        string tBefore = vm.SimulationTimeText;
+
+        const string csv = """
+            # experiment: RollingWheelCycloid
+            # vLinWheel_m_s: 4
+            # rWheel_m: 2
+            # rDot_m: 0.75
+            # omega_rad_s: 2
+            # initialPhase_rad: 0
+            # dt_s: 0.001
+            # simulationTime_s: 1000
+            t_s,x_m,y_m,vx_m_s,vy_m_s,speed_m_s
+            0,0,1,0,0,0
+            1,4,1,0,0,0
+            """;
+
+        vm.ImportCsv(csv, "huge.csv");
+
+        Assert.Same(importedBefore, vm.Imported);
+        Assert.Equal(boundsBefore, vm.Bounds);
+        Assert.Equal(countBefore, vm.Trajectory.Count);
+        Assert.Equal(vBefore, vm.VLinWheelText);
+        Assert.Equal(dtBefore, vm.DtText);
+        Assert.Equal(tBefore, vm.SimulationTimeText);
+        Assert.False(vm.HasError);
+        Assert.Contains("?? ??????? ???????", vm.StatusMessage);
     }
 }
