@@ -709,13 +709,13 @@ public sealed class MainViewModel : ViewModelBase
             bool ratioOk = !ratioApplicable || (m.ConvergenceRatio > 3 && m.ConvergenceRatio < 5);
             allOk &= icsOk && angleOk && ratioOk;
             string ratioVerdict = ratioApplicable
-    ? Mark(ratioOk)
-    : $"не применимо (ω·h = {RuFormat.N(wh, 2)}, вне асимптотического диапазона)";
+                ? Mark(ratioOk)
+                : $"не применимо (ω·h = {RuFormat.N(wh, 2)}, вне асимптотического диапазона)";
 
             lines.Add($"t = {RuFormat.N(m.Time, 1)} с");
             lines.Add($"  МЦС: |v| = {RuFormat.N(m.Point.Speed, 4)} м/с, |ω|·|CP| = {RuFormat.N(m.SpeedFromIcs, 4)} м/с — {Mark(icsOk)}");
             lines.Add($"  угол между v и CP: {RuFormat.N(m.AngleToRadiusDegrees, 4)}° — {Mark(angleOk)}");
-            lines.Add($"  скорость по соседним точкам: погрешность {RuFormat.Sci(m.NumericError)} (h), {RuFormat.Sci(m.NumericHalfStepError)} (h/2), отношение {RuFormat.N(m.ConvergenceRatio, 2)}, ожидается ≈ 4 — {Mark(ratioOk)}");
+            lines.Add($"  скорость по соседним точкам: погрешность {RuFormat.Sci(m.NumericError)} (h), {RuFormat.Sci(m.NumericHalfStepError)} (h/2), отношение {RuFormat.N(m.ConvergenceRatio, 2)}, ожидается ≈ 4 — {ratioVerdict}");
         }
 
         VerificationOk = allOk;
