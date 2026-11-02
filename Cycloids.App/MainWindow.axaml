@@ -1,0 +1,137 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:Cycloids.App.Controls"
+        x:Class="Cycloids.App.MainWindow"
+        Title="Циклоида: траектория точки на катящемся колесе"
+        Width="1280" Height="800" MinWidth="1000" MinHeight="620"
+        Background="#F5F7FA">
+
+  <Window.Styles>
+    <Style Selector="TextBlock.h">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,16,0,4" />
+    </Style>
+    <Style Selector="TextBlock.lab">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#52606D" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.line">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Foreground" Value="#1F2933" />
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="Padding" Value="6,4" />
+      <Setter Property="Margin" Value="0,2" />
+    </Style>
+  </Window.Styles>
+
+  <Grid ColumnDefinitions="340,*">
+
+    <!-- Левая панель: ввод, ошибки, результаты -->
+    <Border Grid.Column="0" Background="White" BorderBrush="#E4E7EB" BorderThickness="0,0,1,0">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16,14,16,16">
+
+          <TextBlock Text="Циклоида" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock Text="Точка на катящемся без проскальзывания колесе"
+                     Classes="lab" TextWrapping="Wrap" />
+
+          <TextBlock Text="Параметры" Classes="h" />
+          <Grid ColumnDefinitions="*,110" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Text="Скорость колеса v, м/с" Classes="lab" />
+            <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding VLinWheelText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="1" Text="Радиус колеса R, м" Classes="lab" />
+            <TextBox   Grid.Row="1" Grid.Column="1" Text="{Binding WheelRadiusText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="2" Text="Расстояние до точки d, м" Classes="lab" />
+            <TextBox   Grid.Row="2" Grid.Column="1" Text="{Binding PointOffsetText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="3" Text="Шаг времени dt, с" Classes="lab" />
+            <TextBox   Grid.Row="3" Grid.Column="1" Text="{Binding DtText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="4" Text="Время моделирования T, с" Classes="lab" />
+            <TextBox   Grid.Row="4" Grid.Column="1" Text="{Binding SimulationTimeText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="5" Text="Начальная фаза φ0, °" Classes="lab" />
+            <TextBox   Grid.Row="5" Grid.Column="1" Text="{Binding InitialPhaseText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="6" Text="Скорость анимации, ×" Classes="lab" />
+            <TextBox   Grid.Row="6" Grid.Column="1" Text="{Binding TimeScaleText, UpdateSourceTrigger=LostFocus}" />
+          </Grid>
+          <TextBlock Text="{Binding OmegaText}" Classes="line" Margin="0,6,0,0" />
+
+          <Border IsVisible="{Binding HasError}" Margin="0,10,0,0" Padding="10,8"
+                  Background="#FDECEA" BorderBrush="#E57373" BorderThickness="1" CornerRadius="4">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#B71C1C" FontSize="12" TextWrapping="Wrap" />
+          </Border>
+
+          <TextBlock Text="Текущее положение точки" Classes="h" />
+          <TextBlock Text="{Binding CurrentReadout}" Classes="line"
+                     FontFamily="Consolas,Menlo,DejaVu Sans Mono,monospace" />
+
+          <TextBlock Text="Характеристики траектории" Classes="h" />
+          <ItemsControl ItemsSource="{Binding AnalyticsLines}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" Classes="line" Margin="0,1" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <TextBlock Text="Проверки" Classes="h" />
+          <ItemsControl ItemsSource="{Binding VerificationLines}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" Classes="line" Margin="0,1" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <TextBlock Text="Импорт результатов" Classes="h" />
+          <StackPanel Orientation="Horizontal">
+            <Button Content="Открыть JSON / CSV…" Click="OnImportFile" Margin="0,0,8,0" />
+            <Button Content="Убрать" Command="{Binding ClearImportCommand}" />
+          </StackPanel>
+          <ItemsControl ItemsSource="{Binding ImportLines}" Margin="0,6,0,0">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" Classes="line" Margin="0,1" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <TextBlock Text="Экспорт" Classes="h" />
+          <StackPanel Orientation="Horizontal">
+            <Button Content="Сохранить CSV" Click="OnExportCsv" IsEnabled="{Binding CanExport}" Margin="0,0,8,0" />
+            <Button Content="Сохранить JSON" Click="OnExportJson" IsEnabled="{Binding CanExport}" />
+          </StackPanel>
+          <TextBlock Text="{Binding StatusMessage}" Classes="lab" TextWrapping="Wrap" Margin="0,6,0,0" />
+
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+
+    <!-- Правая часть: график и управление временем -->
+    <Grid Grid.Column="1" RowDefinitions="*,Auto">
+      <Border Grid.Row="0" Margin="12" Background="White"
+              BorderBrush="#E4E7EB" BorderThickness="1" CornerRadius="4" ClipToBounds="True">
+        <c:PlotControl />
+      </Border>
+
+      <Border Grid.Row="1" Padding="12,4,12,12">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto">
+          <Button x:Name="PlayButton" Grid.Column="0" Content="{Binding PlayPauseLabel}" Command="{Binding PlayPauseCommand}"
+                  MinWidth="84" HorizontalContentAlignment="Center" />
+          <Button Grid.Column="1" Content="Сброс" Command="{Binding ResetCommand}" Margin="8,0,0,0" />
+          <Slider Grid.Column="2" Minimum="0" Maximum="{Binding MaxTime}" Value="{Binding CurrentTime}"
+                  Margin="14,0" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="3" Text="{Binding CurrentTime, StringFormat='t = {0:0.000} с'}"
+                     Classes="lab" MinWidth="86" />
+          <CheckBox Grid.Column="4" Content="Автомасштаб" IsChecked="{Binding AutoScale}" Margin="12,0,0,0" />
+          <Slider Grid.Column="5" Minimum="10" Maximum="400" Width="110"
+                  Value="{Binding ManualScale}" IsEnabled="{Binding !AutoScale}"
+                  VerticalAlignment="Center" ToolTip.Tip="Масштаб, пикселей на метр" />
+        </Grid>
+      </Border>
+    </Grid>
+
+  </Grid>
+</Window>

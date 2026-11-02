@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Cycloids.Model/Cycloids.Model.csproj" />
+  <Project Path="Cycloids.Model.Tests/Cycloids.Model.Tests.csproj" />
+  <Project Path="Cycloids.ViewModel/Cycloids.ViewModel.csproj" />
+  <Project Path="Cycloids.ViewModel.Tests/Cycloids.ViewModel.Tests.csproj" />
+  <Project Path="Cycloids.App/Cycloids.App.csproj" />
+</Solution>
