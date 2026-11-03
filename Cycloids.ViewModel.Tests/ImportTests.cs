@@ -201,13 +201,15 @@ public class ImportTests
         Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
     }
 
+
+
     [Fact]
     public void Parse_RejectsInconsistentOmega()
     {
         string json = Create().BuildJson().Replace("\"omega\": 10,", "\"omega\": 11,");
 
         var ex = Assert.Throws<FormatException>(() => ExperimentImporter.Parse(json));
-        Assert.Contains("?", ex.Message);
+        Assert.Contains("не согласованы", ex.Message);
     }
 
     [Fact]
@@ -216,25 +218,7 @@ public class ImportTests
         string csv = Create().BuildCsv().Replace("# omega_rad_s: 10", "# omega_rad_s: 11");
 
         var ex = Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
-        Assert.Contains("?", ex.Message);
-    }
-
-    [Fact]
-    public void Parse_RejectsInconsistentOmega()
-    {
-        string json = Create().BuildJson().Replace("\"omega\": 10,", "\"omega\": 11,");
-
-        var ex = Assert.Throws<FormatException>(() => ExperimentImporter.Parse(json));
-        Assert.Contains("?", ex.Message);
-    }
-
-    [Fact]
-    public void ParseCsv_RejectsInconsistentOmega()
-    {
-        string csv = Create().BuildCsv().Replace("# omega_rad_s: 10", "# omega_rad_s: 11");
-
-        var ex = Assert.Throws<FormatException>(() => ExperimentImporter.ParseCsv(csv));
-        Assert.Contains("?", ex.Message);
+        Assert.Contains("не согласованы", ex.Message);
     }
 
     [Fact]
@@ -273,7 +257,7 @@ public class ImportTests
         Assert.Equal(dtBefore, vm.DtText);
         Assert.Equal(tBefore, vm.SimulationTimeText);
         Assert.False(vm.HasError);
-        Assert.Contains("?? ??????? ???????", vm.StatusMessage);
+        Assert.Contains("Не удалось открыть", vm.StatusMessage);
     }
     [Fact]
     public void ImportedPlayback_ReadoutUsesDisplayedPoint()
