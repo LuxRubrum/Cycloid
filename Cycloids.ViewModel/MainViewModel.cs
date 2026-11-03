@@ -15,13 +15,14 @@ namespace Cycloids.ViewModel;
 /// <summary>
 /// Связующее звено между View (Avalonia) и физической моделью (Cycloids.Model).
 /// Входы — текстовые поля в терминах задания (v, R, d, dt, T); любое изменение пересобирает модель.
-/// Выходы — только для чтения: траектория, текущее состояние, маркеры t = 0,4 и 0,8 с, проверки.
+/// Выходы — только для чтения: траектория, текущее состояние, маркеры в заданные пользователем моменты времени
+/// (по умолчанию 0,4 и 0,8 с), проверки.
 /// Координаты математические (Y вверх); View сам масштабирует и переворачивает Y.
 /// </summary>
 public sealed class MainViewModel : ViewModelBase
 {
-    public const double FirstMarkerTime = 0.4;
-    public const double SecondMarkerTime = 0.8;
+    public const double DefaultFirstMarkerTime = 0.4;
+    public const double DefaultSecondMarkerTime = 0.8;
 
     private const int MaxSamples = 200_000;
     private const double RadiansPerDegree = Math.PI / 180.0;
@@ -39,11 +40,15 @@ public sealed class MainViewModel : ViewModelBase
     private string _tText = "1.2";
     private string _phaseText = "0";
     private string _speedText = "1";
+    private string _marker1TimeText = "0.4";
+    private string _marker2TimeText = "0.8";
 
     // состояние
     private double _timeScale = 1;
     private double _linearVelocity = 10;
     private double _simulationTime = 1.2;
+    private double _marker1Time = DefaultFirstMarkerTime;
+    private double _marker2Time = DefaultSecondMarkerTime;
     private double _currentTime;
     private bool _isPlaying;
     private bool _autoScale = true;
@@ -137,6 +142,20 @@ public sealed class MainViewModel : ViewModelBase
     {
         get => _speedText;
         set { if (SetProperty(ref _speedText, value)) Rebuild(); }
+    }
+
+    /// <summary>Момент времени первого маркера, с.</summary>
+    public string Marker1TimeText
+    {
+        get => _marker1TimeText;
+        set { if (SetProperty(ref _marker1TimeText, value)) Rebuild(); }
+    }
+
+    /// <summary>Момент времени второго маркера, с.</summary>
+    public string Marker2TimeText
+    {
+        get => _marker2TimeText;
+        set { if (SetProperty(ref _marker2TimeText, value)) Rebuild(); }
     }
 
     public bool AutoScale
@@ -233,7 +252,7 @@ public sealed class MainViewModel : ViewModelBase
         private set => SetProperty(ref _trajectory, value);
     }
 
-    /// <summary>Фиксированные отметки t = 0,4 и 0,8 с (только те, что попадают в интервал моделирования).</summary>
+    /// <summary>Отметки в заданные пользователем моменты времени (по умолчанию 0,4 и 0,8 с).</summary>
     public IReadOnlyList<PointReport> Markers
     {
         get => _markers;
@@ -571,6 +590,8 @@ public sealed class MainViewModel : ViewModelBase
         bool okT = InputParser.TryParse(SimulationTimeText, "Время моделирования T", errors, out double tMax);
         bool okPhase = InputParser.TryParse(InitialPhaseText, "Начальная фаза φ0", errors, out double phaseDeg);
         bool okScale = InputParser.TryParse(TimeScaleText, "Скорость анимации", errors, out double scale);
+        bool okMarker1 = InputParser.TryParse(Marker1TimeText, "Момент времени маркера 1", errors, out double marker1Time);
+        bool okMarker2 = InputParser.TryParse(Marker2TimeText, "Момент времени маркера 2", errors, out double marker2Time);
 
         if (okV && v == 0)
             errors.Add("Линейная скорость равна нулю: колесо стоит, траектории нет.");
@@ -584,6 +605,10 @@ public sealed class MainViewModel : ViewModelBase
             errors.Add("Время моделирования T должно быть больше 0.");
         if (okScale && scale <= 0)
             errors.Add("Скорость анимации должна быть больше 0.");
+        if (okMarker1 && marker1Time < 0)
+            errors.Add("Момент времени маркера 1 не может быть отрицательным.");
+        if (okMarker2 && marker2Time < 0)
+            errors.Add("Момент времени маркера 2 не может быть отрицательным.");
         if (okDt && okT && dt > 0 && tMax > 0 && Math.Ceiling(tMax / dt) > MaxSamples)
             errors.Add($"Слишком много точек (больше {MaxSamples}): увеличьте шаг dt или уменьшите время T.");
 
@@ -608,6 +633,8 @@ public sealed class MainViewModel : ViewModelBase
         _timeScale = scale;
         _linearVelocity = v;
         _simulationTime = tMax;
+        _marker1Time = marker1Time;
+        _marker2Time = marker2Time;
         _parameters = parameters;
         _calculator = new CycloidCalculator(parameters);
         _analytics = new CycloidAnalytics(parameters);
@@ -657,7 +684,7 @@ public sealed class MainViewModel : ViewModelBase
     private void BuildMarkers()
     {
         var list = new List<PointReport>();
-        foreach (double t in new[] { FirstMarkerTime, SecondMarkerTime })
+        foreach (double t in new[] { _marker1Time, _marker2Time })
         {
             if (t <= _simulationTime + 1e-12)
                 list.Add(PointReport.Create(_calculator, t, ActualDt));
@@ -698,10 +725,14 @@ public sealed class MainViewModel : ViewModelBase
         if (_imported is not null)
             lines.Add("Проверки относятся к модели; точки из файла сравниваются в блоке «Импорт».");
 
-        if (Markers.Count == 0)
-        {
-            lines.Add($"Маркеры не показаны: время T меньше {RuFormat.N(FirstMarkerTime, 1)} с.");
-        }
+        bool marker1Visible = _marker1Time <= _simulationTime + 1e-12;
+        bool marker2Visible = _marker2Time <= _simulationTime + 1e-12;
+        if (!marker1Visible && !marker2Visible)
+            lines.Add("Маркеры не показаны: оба момента времени больше T.");
+        else if (!marker1Visible)
+            lines.Add($"Маркер 1 не показан: его момент времени больше T ({RuFormat.N(_marker1Time, 3)} с).");
+        else if (!marker2Visible)
+            lines.Add($"Маркер 2 не показан: его момент времени больше T ({RuFormat.N(_marker2Time, 3)} с).");
 
         foreach (var m in Markers)
         {
