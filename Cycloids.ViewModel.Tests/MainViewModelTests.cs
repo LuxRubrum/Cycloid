@@ -103,6 +103,60 @@ public class MainViewModelTests
         Assert.False(vm.HasError);
     }
 
+    [Fact]
+    public void Marker1Time_IsUserDefined()
+    {
+        var vm = Create();
+        vm.Marker1TimeText = "0.3";
+
+        Assert.False(vm.HasError);
+        Assert.Equal(0.3, vm.Markers[0].Time, 12);
+    }
+
+    [Fact]
+    public void Marker1Time_Comma_IsAcceptedAsDecimalSeparator()
+    {
+        var vm = Create();
+        vm.Marker1TimeText = "0,3";
+
+        Assert.False(vm.HasError);
+        Assert.Equal(0.3, vm.Markers[0].Time, 12);
+    }
+
+    [Theory]
+    [InlineData("Marker1TimeText", "-1")]
+    [InlineData("Marker2TimeText", "abc")]
+    public void InvalidMarkerTime_ShowsError(string property, string value)
+    {
+        var vm = Create();
+
+        typeof(MainViewModel).GetProperty(property)!.SetValue(vm, value);
+
+        Assert.True(vm.HasError);
+    }
+
+    [Fact]
+    public void MarkerBeyondSimulationTime_IsHidden()
+    {
+        var vm = Create();
+        vm.Marker1TimeText = "2";
+
+        Assert.False(vm.HasError);
+        Assert.Single(vm.Markers);
+        Assert.Equal(0.8, vm.Markers[0].Time, 12);
+    }
+
+    [Fact]
+    public void MarkersBeyondSimulationTime_AreHidden()
+    {
+        var vm = Create();
+        vm.Marker1TimeText = "2";
+        vm.Marker2TimeText = "3";
+
+        Assert.False(vm.HasError);
+        Assert.Empty(vm.Markers);
+    }
+
     [Theory]
     [InlineData("VLinWheelText", "0")]
     [InlineData("VLinWheelText", "abc")]
