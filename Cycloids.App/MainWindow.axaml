@@ -40,7 +40,7 @@
                      Classes="lab" TextWrapping="Wrap" />
 
           <TextBlock Text="Параметры" Classes="h" />
-          <Grid ColumnDefinitions="*,110" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+          <Grid ColumnDefinitions="*,110" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
             <TextBlock Grid.Row="0" Text="Скорость колеса v, м/с" Classes="lab" />
             <TextBox   Grid.Row="0" Grid.Column="1" Text="{Binding VLinWheelText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="1" Text="Радиус колеса R, м" Classes="lab" />
@@ -55,6 +55,10 @@
             <TextBox   Grid.Row="5" Grid.Column="1" Text="{Binding InitialPhaseText, UpdateSourceTrigger=LostFocus}" />
             <TextBlock Grid.Row="6" Text="Скорость анимации, ×" Classes="lab" />
             <TextBox   Grid.Row="6" Grid.Column="1" Text="{Binding TimeScaleText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="7" Text="Момент маркера 1, с" Classes="lab" />
+            <TextBox   Grid.Row="7" Grid.Column="1" Text="{Binding Marker1TimeText, UpdateSourceTrigger=LostFocus}" />
+            <TextBlock Grid.Row="8" Text="Момент маркера 2, с" Classes="lab" />
+            <TextBox   Grid.Row="8" Grid.Column="1" Text="{Binding Marker2TimeText, UpdateSourceTrigger=LostFocus}" />
           </Grid>
           <TextBlock Text="{Binding OmegaText}" Classes="line" Margin="0,6,0,0" />
 
