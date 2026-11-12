@@ -72,7 +72,9 @@ public static class ExperimentImporter
                 Omega: Number(p, "omega", "parameters.omega"),
                 InitialPhase: Number(p, "initialPhase", "parameters.initialPhase"),
                 Step: Number(p, "dt", "parameters.dt"),
-                SimulationTime: Number(p, "simulationTime", "parameters.simulationTime"));
+                SimulationTime: Number(p, "simulationTime", "parameters.simulationTime"),
+                Marker1Time: OptionalNumber(p, "marker1Time", "parameters.marker1Time"),
+                Marker2Time: OptionalNumber(p, "marker2Time", "parameters.marker2Time"));
             ValidateParameters(parameters);
 
             CheckColumns(root);
@@ -188,7 +190,9 @@ public static class ExperimentImporter
             Omega: MetaNumber(meta, "omega_rad_s"),
             InitialPhase: MetaNumber(meta, "initialPhase_rad"),
             Step: MetaNumber(meta, "dt_s"),
-            SimulationTime: MetaNumber(meta, "simulationTime_s"));
+            SimulationTime: MetaNumber(meta, "simulationTime_s"),
+            Marker1Time: OptionalMetaNumber(meta, "marker1Time_s"),
+            Marker2Time: OptionalMetaNumber(meta, "marker2Time_s"));
         ValidateParameters(parameters);
 
         return new ImportedExperiment(string.Empty, parameters, points);
@@ -204,6 +208,14 @@ public static class ExperimentImporter
         }
 
         return value;
+    }
+
+    private static double? OptionalMetaNumber(Dictionary<string, string> meta, string key)
+    {
+        if (!meta.ContainsKey(key))
+            return null;
+
+        return MetaNumber(meta, key);
     }
 
     private static void CheckColumns(JsonElement root)
@@ -232,5 +244,13 @@ public static class ExperimentImporter
         }
 
         return value;
+    }
+
+    private static double? OptionalNumber(JsonElement obj, string property, string path)
+    {
+        if (!obj.TryGetProperty(property, out _))
+            return null;
+
+        return Number(obj, property, path);
     }
 }

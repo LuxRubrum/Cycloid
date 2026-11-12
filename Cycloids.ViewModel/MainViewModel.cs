@@ -384,6 +384,7 @@ public sealed class MainViewModel : ViewModelBase
             var previousExtent = _importedExtent;
             var previousPlay = _playImportedData;
             var previousInputs = (_vText, _rText, _dText, _dtText, _tText, _phaseText);
+            var previousMarkerInputs = (_marker1TimeText, _marker2TimeText);
 
             Imported = data;
             _importedExtent = new SceneBounds(xMin, xMax, yMin, yMax);
@@ -399,12 +400,15 @@ public sealed class MainViewModel : ViewModelBase
                 _playImportedData = previousPlay;
 
                 (_vText, _rText, _dText, _dtText, _tText, _phaseText) = previousInputs;
+                (_marker1TimeText, _marker2TimeText) = previousMarkerInputs;
                 OnPropertyChanged(nameof(VLinWheelText));
                 OnPropertyChanged(nameof(WheelRadiusText));
                 OnPropertyChanged(nameof(PointOffsetText));
                 OnPropertyChanged(nameof(DtText));
                 OnPropertyChanged(nameof(SimulationTimeText));
                 OnPropertyChanged(nameof(InitialPhaseText));
+                OnPropertyChanged(nameof(Marker1TimeText));
+                OnPropertyChanged(nameof(Marker2TimeText));
 
                 Rebuild();
                 StatusMessage = $"Не удалось открыть «{fileName}»: {reason}";
@@ -445,6 +449,10 @@ public sealed class MainViewModel : ViewModelBase
         _dtText = FormatInput(parameters.Step);
         _tText = FormatInput(parameters.SimulationTime);
         _phaseText = FormatInput(parameters.InitialPhase / RadiansPerDegree);
+        if (parameters.Marker1Time is double marker1Time)
+            _marker1TimeText = FormatInput(marker1Time);
+        if (parameters.Marker2Time is double marker2Time)
+            _marker2TimeText = FormatInput(marker2Time);
 
         OnPropertyChanged(nameof(VLinWheelText));
         OnPropertyChanged(nameof(WheelRadiusText));
@@ -452,6 +460,10 @@ public sealed class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(DtText));
         OnPropertyChanged(nameof(SimulationTimeText));
         OnPropertyChanged(nameof(InitialPhaseText));
+        if (parameters.Marker1Time is not null)
+            OnPropertyChanged(nameof(Marker1TimeText));
+        if (parameters.Marker2Time is not null)
+            OnPropertyChanged(nameof(Marker2TimeText));
 
         Rebuild();
     }
@@ -538,7 +550,15 @@ public sealed class MainViewModel : ViewModelBase
         if (HasError)
             throw new InvalidOperationException("Экспорт недоступен: во входных данных есть ошибки.");
 
-        return new ExperimentSnapshot(_parameters, _linearVelocity, ActualDt, _simulationTime, Trajectory, Markers);
+        return new ExperimentSnapshot(
+            _parameters,
+            _linearVelocity,
+            ActualDt,
+            _simulationTime,
+            _marker1Time,
+            _marker2Time,
+            Trajectory,
+            Markers);
     }
 
     // ───────────── Внутренняя логика ─────────────

@@ -54,6 +54,30 @@ public class ImportTests
         Assert.Contains(vm.ImportLines, l => l.Contains("Параметры совпадают"));
     }
 
+    [Theory]
+    [InlineData("json")]
+    [InlineData("csv")]
+    public void Import_PreservesManuallySetMarkerTimes(string format)
+    {
+        var vm = Create();
+        vm.Marker1TimeText = "0.3";
+        vm.Marker2TimeText = "1.1";
+        string exported = format == "json" ? vm.BuildJson() : vm.BuildCsv();
+
+        vm.Marker1TimeText = "0.7";
+        vm.Marker2TimeText = "0.9";
+
+        if (format == "json")
+            vm.ImportJson(exported, "result.json");
+        else
+            vm.ImportCsv(exported, "result.csv");
+
+        Assert.Equal("0.3", vm.Marker1TimeText);
+        Assert.Equal("1.1", vm.Marker2TimeText);
+        Assert.Equal(0.3, vm.Markers[0].Time, 12);
+        Assert.DoesNotContain(vm.Markers, marker => Math.Abs(marker.Time - 0.7) < 1e-12);
+    }
+
     [Fact]
     public void ImportCsv_UsesImportedPointsForAnimation()
     {
@@ -226,6 +250,8 @@ public class ImportTests
     {
         var vm = Create();
         vm.ImportJson(vm.BuildJson(), "good.json");
+        vm.Marker1TimeText = "0.3";
+        vm.Marker2TimeText = "1.1";
 
         var importedBefore = vm.Imported;
         var boundsBefore = vm.Bounds;
@@ -233,6 +259,8 @@ public class ImportTests
         string vBefore = vm.VLinWheelText;
         string dtBefore = vm.DtText;
         string tBefore = vm.SimulationTimeText;
+        string marker1Before = vm.Marker1TimeText;
+        string marker2Before = vm.Marker2TimeText;
 
         const string csv = """
             # experiment: RollingWheelCycloid
@@ -256,6 +284,8 @@ public class ImportTests
         Assert.Equal(vBefore, vm.VLinWheelText);
         Assert.Equal(dtBefore, vm.DtText);
         Assert.Equal(tBefore, vm.SimulationTimeText);
+        Assert.Equal(marker1Before, vm.Marker1TimeText);
+        Assert.Equal(marker2Before, vm.Marker2TimeText);
         Assert.False(vm.HasError);
         Assert.Contains("Не удалось открыть", vm.StatusMessage);
     }

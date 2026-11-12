@@ -4,21 +4,22 @@
         x:Class="Cycloids.App.MainWindow"
         Title="Циклоида: траектория точки на катящемся колесе"
         Width="1280" Height="800" MinWidth="1000" MinHeight="620"
+        FontSize="15"
         Background="#F5F7FA">
 
   <Window.Styles>
     <Style Selector="TextBlock.h">
-      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontSize" Value="15" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Margin" Value="0,16,0,4" />
     </Style>
     <Style Selector="TextBlock.lab">
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="14" />
       <Setter Property="Foreground" Value="#52606D" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
     <Style Selector="TextBlock.line">
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="14" />
       <Setter Property="TextWrapping" Value="Wrap" />
       <Setter Property="Foreground" Value="#1F2933" />
     </Style>
@@ -64,7 +65,7 @@
 
           <Border IsVisible="{Binding HasError}" Margin="0,10,0,0" Padding="10,8"
                   Background="#FDECEA" BorderBrush="#E57373" BorderThickness="1" CornerRadius="4">
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="#B71C1C" FontSize="12" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#B71C1C" FontSize="14" TextWrapping="Wrap" />
           </Border>
 
           <TextBlock Text="Текущее положение точки" Classes="h" />
