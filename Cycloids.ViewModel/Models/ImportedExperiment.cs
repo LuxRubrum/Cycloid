@@ -10,7 +10,9 @@ public sealed record ImportedParameters(
     double Omega,
     double InitialPhase,
     double Step,
-    double SimulationTime);
+    double SimulationTime,
+    double? Marker1Time = null,
+    double? Marker2Time = null);
 
 /// <summary>
 /// Траектория, открытая из ранее сохранённого JSON. В файле нет ускорений, поэтому Ax и Ay равны нулю.

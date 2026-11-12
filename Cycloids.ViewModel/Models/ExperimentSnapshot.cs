@@ -9,5 +9,7 @@ public sealed record ExperimentSnapshot(
     double LinearVelocity,
     double Step,
     double SimulationTime,
+    double Marker1Time,
+    double Marker2Time,
     IReadOnlyList<PointState> Points,
     IReadOnlyList<PointReport> Markers);

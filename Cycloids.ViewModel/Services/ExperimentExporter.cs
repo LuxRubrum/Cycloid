@@ -31,6 +31,8 @@ public static class ExperimentExporter
         sb.Append("# initialPhase_rad: ").AppendLine(Num(p.InitialPhase));
         sb.Append("# dt_s: ").AppendLine(Num(s.Step));
         sb.Append("# simulationTime_s: ").AppendLine(Num(s.SimulationTime));
+        sb.Append("# marker1Time_s: ").AppendLine(Num(s.Marker1Time));
+        sb.Append("# marker2Time_s: ").AppendLine(Num(s.Marker2Time));
         sb.AppendLine("t_s,x_m,y_m,vx_m_s,vy_m_s,speed_m_s");
 
         foreach (var pt in s.Points)
@@ -66,7 +68,9 @@ public static class ExperimentExporter
         sb.AppendLine($"    \"omega\": {Num(p.AngularVelocity)},");
         sb.AppendLine($"    \"initialPhase\": {Num(p.InitialPhase)},");
         sb.AppendLine($"    \"dt\": {Num(s.Step)},");
-        sb.AppendLine($"    \"simulationTime\": {Num(s.SimulationTime)}");
+        sb.AppendLine($"    \"simulationTime\": {Num(s.SimulationTime)},");
+        sb.AppendLine($"    \"marker1Time\": {Num(s.Marker1Time)},");
+        sb.AppendLine($"    \"marker2Time\": {Num(s.Marker2Time)}");
         sb.AppendLine("  },");
 
         sb.AppendLine("  \"markers\": [");
